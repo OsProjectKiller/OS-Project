@@ -55,16 +55,22 @@ int main(int argc, char *argv[])
     }
 
     if (pid == 0){ //child process
-        printf("DLLM");
+        read(p2c_fd[childnum][0],buf,100);
+        printf("Child %d: %s\n", childnum, buf);
+        exit(0);
     }else{ //parent
-        char *input[20];
+        char input[100];
+        char end[10] = "endProgram";
+        int count = 0;
+
+        printf("~~Welcome to AMR~~\n");
         while(1){
-            printf("~~Welcome to AMR~~\n");
             printf("Please enter appoinment:\n");
-            for (i=0;i<30;i++){
-                scanf("%s ",input);
-                printf("%s ",input);
-            }
+            scanf("%[^\n]",input);
+            write(p2c_fd[1][1],input,100);
+            if (strncmp(input,end,0) == 0)
+                exit(0);
+            printf("-> [Pending]");
         }
     }
 
