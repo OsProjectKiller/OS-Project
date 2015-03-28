@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-//DLLM
+#include <unistd.h>
+#include <string.h>
+
 char ***createtimeslot(int x,int y,int z){
     int i, j, k;
 
@@ -29,12 +31,78 @@ void deallocatearr(char ***arr3D,int x){
 }
 
 int main(int argc, char *argv[])
-{
-    
-    char ***timeslot = createtimeslot(300,20,20);
-    timeslot[0][0] = "2014-3-2";
-    timeslot[0] = "study 1830 2230";
-    printf("%s %s\n",timeslot[0][0],timeslot[0][0]);
-    deallocatearr(timeslot,300);
+{  
+    int i;
+    int pid;
+    int p2c_fd[argc-1][2];
+    int c2p_fd[argc-1][2];
+    int childnum;
+    char buf[80];
+    char buf2[80];
+
+    for (i = 0;i < argc-1; i++){ //creating pipe
+        if (pipe(p2c_fd[i]) < 0 || pipe(c2p_fd[i]) < 0){
+            printf("Cannot create pipe\n");
+            exit(1);
+        }
+    }
+    for (i = 0; i < argc-1; i++){
+        pid = fork();
+        if (pid == 0){
+            childnum = i;
+            break;
+        }
+    }
+
+    if (pid == 0){ //child process
+        printf("DLLM");
+    }else{ //parent
+        char *input[20];
+        while(1){
+            printf("~~Welcome to AMR~~\n");
+            printf("Please enter appoinment:\n");
+            for (i=0;i<30;i++){
+                scanf("%s ",input);
+                printf("%s ",input);
+            }
+        }
+    }
+
+    /*char ***calendar = createtimeslot(100,100,20);
+    char *input;
+    char *date[100]; //for storing the order of date
+    int i,j;
+    int currentapp[100]; //the current appoinments of each date
+    int totaldate = 0; //the current total of date inputted
+    int countdatepos = 0; //for counting the position of the date*/
+
+    /*for (i=0;i<100;i++)
+        date[i] = malloc(15);
+    for (i=0;i<100;i++)
+        currentapp[i] = 0;
+    date[0] = "2014-3-12";
+    totaldate++;
+    date[1] = "2014-4-11";
+    totaldate++;
+
+    input = "2014-4-13";
+
+    for (i=0; i<totaldate;i++){
+        if (date[i] == input){
+            countdatepos = i;
+            break;
+        }
+    }
+
+    if (i == totaldate){
+        date[totaldate] = input;
+        countdatepos = totaldate;
+    }
+
+    calendar[countdatepos][currentapp[countdatepos]] = "Study";
+    currentapp[countdatepos]++;
+    printf("%s\n",calendar[2][0]);
+    printf("%d\n", currentapp[countdatepos]);*/
+
 }
 
