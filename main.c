@@ -3,33 +3,6 @@
 #include <unistd.h>
 #include <string.h>
 
-char ***createtimeslot(int x,int y,int z){
-    int i, j, k;
-
-    char *allElements = malloc(x * y * z * sizeof(char));
-    char ***array3D = malloc(x * sizeof(char **));
-
-    for(i = 0; i < x; i++)
-    {
-        array3D[i] = malloc(y * sizeof(char *));
-        for(j = 0; j < y; j++)
-        {
-            array3D[i][j] = allElements + (i * y * z) + (j * z);
-        }
-    }
-    free(allElements);
-    return array3D;
-}
-
-void deallocatearr(char ***arr3D,int x){
-    int i,j;
-    for(i = 0; i < x; i++)
-    {
-        free(arr3D[i]);
-    }
-    free(arr3D);
-}
-
 void extractname(char out[20],char in[80]){
     char *startpos,*endpos;
     int pos,i,startindex,endindex;
@@ -79,7 +52,7 @@ int main(int argc, char *argv[])
         close(p2c_fd[childnum][1]); //close parent out
         close(c2p_fd[childnum][0]); //close child in
 
-        char ***calendar = createtimeslot(100,100,20);
+        char *calendar[100][100];
         char input[20];
         char *date[100]; //for storing the order of date
         int j,n;
@@ -87,8 +60,11 @@ int main(int argc, char *argv[])
         int totaldate=0; //the current total of date inputted
         int countdatepos=0; //for counting the position of the date*/
 
-        for (i=0;i<99;i++)
-            date[i] = malloc(100);
+        for (i=0;i<100;i++)
+            date[i] = malloc(20);
+        for (i=0;i<100;i++)
+            for (j=0;j<100;j++)
+                calendar[i][j] = malloc(20);
         for (i=0;i<100;i++)
             currentapp[i] = 0;
 
@@ -119,9 +95,9 @@ int main(int argc, char *argv[])
             strcpy(calendar[countdatepos][currentapp[countdatepos]],buf);
             currentapp[countdatepos]++;
             printf("%d,%d\n",countdatepos,currentapp[countdatepos]);
-            //for (i = 0; i < totaldate; i++)
-                //for (j = 0;j<currentapp[i];j++)
-                    printf("%s\n",calendar[0][0]);
+            for (i = 0; i < totaldate; i++)
+                for (j = 0;j<currentapp[i];j++)
+                    printf("%d,%d:%s\n",i,j,calendar[i][j]);
         }
 
         close(p2c_fd[childnum][0]); //close parent int
@@ -164,40 +140,3 @@ int main(int argc, char *argv[])
     }
     exit(0);
 }
-    
-    /*char ***calendar = createtimeslot(100,100,20);
-    char *input;
-    char *date[100]; //for storing the order of date
-    int i,j;
-    int currentapp[100]; //the current appoinments of each date
-    int totaldate = 0; //the current total of date inputted
-    int countdatepos = 0; //for counting the position of the date*/
-
-    /*for (i=0;i<100;i++)
-        date[i] = malloc(15);
-    for (i=0;i<100;i++)
-        currentapp[i] = 0;
-    date[0] = "2014-3-12";
-    totaldate++;
-    date[1] = "2014-4-11";
-    totaldate++;
-
-    input = "2014-4-13";
-
-    for (i=0; i<totaldate;i++){
-        if (date[i] == input){
-            countdatepos = i;
-            break;
-        }
-    }
-
-    if (i == totaldate){
-        date[totaldate] = input;
-        countdatepos = totaldate;
-    }
-
-    calendar[countdatepos][currentapp[countdatepos]] = "Study";
-    currentapp[countdatepos]++;
-    printf("%s\n",calendar[2][0]);
-    printf("%d\n", currentapp[countdatepos]);*/
-
