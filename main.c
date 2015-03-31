@@ -30,6 +30,26 @@ void deallocatearr(char ***arr3D,int x){
     free(arr3D);
 }
 
+void extractname(char out[20],char in[80]){
+    char *startpos,*endpos;
+    int pos,i,startindex,endindex;
+    startpos = strchr(in,'-');
+    startindex = startpos - in;
+    endpos = strchr(startpos,' ');
+    endindex = endpos - startpos;
+    strncpy(out, in+startindex+1, endindex-1);
+}
+
+void extractdate(char out[20],char in[80]){
+    char *startpos,*endpos;
+    int pos,i,startindex,endindex;
+    startpos = strchr(in,'-');
+    startindex = startpos - in;
+    endpos = strchr(startpos,' ');
+    endindex = endpos - startpos;
+    strncpy(out, in+startindex+endindex+1, 10);
+}
+
 int main(int argc, char *argv[])
 {  
     int i;
@@ -49,31 +69,102 @@ int main(int argc, char *argv[])
     for (i = 0; i < argc-1; i++){
         pid = fork();
         if (pid == 0){
+            //printf("My child number is: %d\n",i);
             childnum = i;
             break;
         }
     }
+    
+    if (pid == 0){ //child process        
+        close(p2c_fd[childnum][1]); //close parent out
+        close(c2p_fd[childnum][0]); //close child in
 
-    if (pid == 0){ //child process
-        read(p2c_fd[childnum][0],buf,100);
-        printf("Child %d: %s\n", childnum, buf);
-        exit(0);
+        char ***calendar = createtimeslot(100,100,20);
+        char input[20];
+        char *date[100]; //for storing the order of date
+        int j,n;
+        int currentapp[100]; //the current appoinments of each date
+        int totaldate=0; //the current total of date inputted
+        int countdatepos=0; //for counting the position of the date*/
+
+        for (i=0;i<99;i++)
+            date[i] = malloc(100);
+        for (i=0;i<100;i++)
+            currentapp[i] = 0;
+
+        while ((n = read(p2c_fd[childnum][0],buf,80)) > 0){
+            buf[n] = 0;
+            extractdate(input,buf);
+            //fprintf(stderr,"\"%s\"\n", input);
+            if (totaldate == 0){
+                strcpy(date[0],input);
+                countdatepos = 0;
+                totaldate = 1;
+                printf("First Time\n");
+            }else{
+                printf("input:%s,totaldate:%d\n",input,totaldate);
+                for (i=0; i<totaldate;i++){
+                    if (strcmp(date[i],input) == 0){
+                        countdatepos = i;
+                        break;
+                    }
+                }
+                printf("i:%d\n", i);
+                if (i == totaldate){
+                    strcpy(date[i],input);
+                    countdatepos = i;
+                    totaldate++;
+                }
+            }
+            strcpy(calendar[countdatepos][currentapp[countdatepos]],buf);
+            currentapp[countdatepos]++;
+            printf("%d,%d\n",countdatepos,currentapp[countdatepos]);
+            //for (i = 0; i < totaldate; i++)
+                //for (j = 0;j<currentapp[i];j++)
+                    printf("%s\n",calendar[0][0]);
+        }
+
+        close(p2c_fd[childnum][0]); //close parent int
+        close(c2p_fd[childnum][1]); //close child out
     }else{ //parent
-        char input[100];
-        char end[10] = "endProgram";
+        for (i=0;i<argc-1;i++){
+            close(p2c_fd[i][0]); //close parent in
+            close(c2p_fd[i][1]); //close child out
+        }
+        char input[80];
+        char tempname[20];
+        char end[] = "endProgram";
         int count = 0;
+        int tempnum,n;
 
         printf("~~Welcome to AMR~~\n");
         while(1){
             printf("Please enter appoinment:\n");
-            scanf("%[^\n]",input);
-            write(p2c_fd[1][1],input,100);
-            if (strncmp(input,end,0) == 0)
+            n = read(STDIN_FILENO,buf,80);
+            strncpy(input,buf,n);
+            if (buf[0] == 'e') //Not yet complete
                 exit(0);
-            printf("-> [Pending]");
+            printf("-> [Pending]\n");
+            if (n <= 0) break;
+            buf[--n] = 0;
+            extractname(tempname,buf);
+            for (i=1;i<=(argc-1);i++){
+                if (strcmp(argv[i],tempname)==0){
+                    tempnum = i;
+                    break;
+                }
+            }
+            write(p2c_fd[tempnum-1][1],buf,n);
         }
+        for (i=0;i<argc-1;i++){
+            close(p2c_fd[i][1]); //close parent out
+            close(c2p_fd[i][0]); //close child in
+        }
+        wait(NULL);
     }
-
+    exit(0);
+}
+    
     /*char ***calendar = createtimeslot(100,100,20);
     char *input;
     char *date[100]; //for storing the order of date
@@ -109,6 +200,4 @@ int main(int argc, char *argv[])
     currentapp[countdatepos]++;
     printf("%s\n",calendar[2][0]);
     printf("%d\n", currentapp[countdatepos]);*/
-
-}
 

@@ -1,0 +1,13 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+
+int main(){
+	char in[] = "addAssignment -Adam 2014-2-3";
+	char *startpos,*endpos,*out;
+    int pos,i,startindex,endindex;
+    startpos = strchr(in,'-');
+    startpos = startpos - in;
+    printf("%s\n);
+}
