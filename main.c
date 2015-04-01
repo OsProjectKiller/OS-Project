@@ -6,6 +6,9 @@
 void extractname(char out[20],char in[80]){
     char *startpos,*endpos;
     int pos,i,startindex,endindex;
+    for (i=0;i<20;i++){
+        out[i] = 0;
+    }
     startpos = strchr(in,'-');
     startindex = startpos - in;
     endpos = strchr(startpos,' ');
@@ -16,6 +19,9 @@ void extractname(char out[20],char in[80]){
 void extractdate(char out[20],char in[80]){
     char *startpos,*endpos;
     int pos,i,startindex,endindex;
+    for (i=0;i<20;i++){
+        out[i] = 0;
+    }
     startpos = strchr(in,'-');
     startindex = startpos - in;
     endpos = strchr(startpos,' ');
@@ -25,7 +31,10 @@ void extractdate(char out[20],char in[80]){
 
 void extractbatchname(char out[20],char in[80],int max){
     char *startpos;
-    int startindex;
+    int i,startindex;
+    for (i=0;i<20;i++){
+        out[i] = 0;
+    }
     startpos = strchr(in,'-');
     startindex = startpos - in;
     strncpy(out,in+startindex+1,max-startindex-1);
@@ -83,16 +92,13 @@ int main(int argc, char *argv[])
                 strcpy(date[0],input);
                 countdatepos = 0;
                 totaldate = 1;
-                printf("First Time\n");
             }else{
-                printf("input:%s,totaldate:%d\n",input,totaldate);
                 for (i=0; i<totaldate;i++){
                     if (strcmp(date[i],input) == 0){
                         countdatepos = i;
                         break;
                     }
                 }
-                printf("i:%d\n", i);
                 if (i == totaldate){
                     strcpy(date[i],input);
                     countdatepos = i;
@@ -100,11 +106,11 @@ int main(int argc, char *argv[])
                 }
             }
             strcpy(calendar[countdatepos][currentapp[countdatepos]],buf);
+            printf("childnum[%d]:calendar[%d][%d]:%s\n",childnum,countdatepos,currentapp[countdatepos],calendar[countdatepos][currentapp[countdatepos]]);
             currentapp[countdatepos]++;
-            printf("%d,%d\n",countdatepos,currentapp[countdatepos]);
-            for (i = 0; i < totaldate; i++)
+            /*for (i = 0; i < totaldate; i++)
                 for (j = 0;j<currentapp[i];j++)
-                    printf("%d,%d:%s\n",i,j,calendar[i][j]);
+                    */
         }
 
         close(p2c_fd[childnum][0]); //close parent int
@@ -144,6 +150,7 @@ int main(int argc, char *argv[])
                 while (fgets(buf,sizeof(buf),infilep)!=NULL){ //put the input to the array
                     buf[strlen(buf)-1] = 0;
                     extractname(tempchildname,buf);
+                    printf("childname:%s\n",tempchildname);
                     for (i=1;i<=(argc-1);i++){
                         if (strcmp(argv[i],tempchildname)==0){
                             tempnum = i;
