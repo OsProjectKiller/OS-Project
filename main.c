@@ -116,6 +116,7 @@ int main(int argc, char *argv[])
         }
         char input[80];
         char tempname[20];
+        char tempchildname[20];
         char end[] = "endProgram";
         int count = 0;
         int tempnum,n;
@@ -142,9 +143,9 @@ int main(int argc, char *argv[])
                 }
                 while (fgets(buf,sizeof(buf),infilep)!=NULL){ //put the input to the array
                     buf[strlen(buf)-1] = 0;
-                    extractname(tempname,buf);
+                    extractname(tempchildname,buf);
                     for (i=1;i<=(argc-1);i++){
-                        if (strcmp(argv[i],tempname)==0){
+                        if (strcmp(argv[i],tempchildname)==0){
                             tempnum = i;
                             break;
                         }
