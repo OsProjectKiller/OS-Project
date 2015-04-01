@@ -23,8 +23,15 @@ void extractdate(char out[20],char in[80]){
     strncpy(out, in+startindex+endindex+1, 10);
 }
 
+void extractbatchname(char out[20],char in[80],int max){
+    char *startpos;
+    int startindex;
+    startpos = strchr(in,'-');
+    startindex = startpos - in;
+    strncpy(out,in+startindex+1,max-startindex-1);
+}
 int main(int argc, char *argv[])
-{  
+{ 
     int i;
     int pid;
     int p2c_fd[argc-1][2];
@@ -64,7 +71,7 @@ int main(int argc, char *argv[])
             date[i] = malloc(20);
         for (i=0;i<100;i++)
             for (j=0;j<100;j++)
-                calendar[i][j] = malloc(20);
+                calendar[i][j] = malloc(100);
         for (i=0;i<100;i++)
             currentapp[i] = 0;
 
@@ -117,20 +124,46 @@ int main(int argc, char *argv[])
         while(1){
             printf("Please enter appoinment:\n");
             n = read(STDIN_FILENO,buf,80);
-            strncpy(input,buf,n);
             if (buf[0] == 'e') //Not yet complete
                 exit(0);
-            printf("-> [Pending]\n");
-            if (n <= 0) break;
-            buf[--n] = 0;
-            extractname(tempname,buf);
-            for (i=1;i<=(argc-1);i++){
-                if (strcmp(argv[i],tempname)==0){
-                    tempnum = i;
-                    break;
+            else if (buf[3] == 'B'){
+                FILE *infilep;
+                char rub;
+                char storing[100];
+
+                printf("-> [Pending]\n");
+                buf[--n] = 0;
+                extractbatchname(tempname,buf,n);
+                infilep = fopen(tempname, "r");
+                printf("[%s]\n", tempname);
+                if (infilep == NULL){ //check for opening file error
+                    printf("Error in opening input file\n");
+                    exit(1);
                 }
-            }
+                while (fgets(buf,sizeof(buf),infilep)!=NULL){ //put the input to the array
+                    buf[strlen(buf)-1] = 0;
+                    extractname(tempname,buf);
+                    for (i=1;i<=(argc-1);i++){
+                        if (strcmp(argv[i],tempname)==0){
+                            tempnum = i;
+                            break;
+                        }
+                    }
+                    write(p2c_fd[tempnum-1][1],buf,80);
+                }
+            }else{
+                printf("-> [Pending]\n");
+                if (n <= 0) break;
+                buf[--n] = 0;
+                extractname(tempname,buf);
+                for (i=1;i<=(argc-1);i++){
+                    if (strcmp(argv[i],tempname)==0){
+                        tempnum = i;
+                        break;
+                    }
+                }
             write(p2c_fd[tempnum-1][1],buf,n);
+            }
         }
         for (i=0;i<argc-1;i++){
             close(p2c_fd[i][1]); //close parent out
